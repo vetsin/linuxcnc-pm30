@@ -46,6 +46,8 @@ net machine-is-enabled  =>     [HMOT](CARD0).7i76.0.0.output-00
 net machine-is-enabled  =>     [HMOT](CARD0).7i76.0.0.output-01
 
 
+# --- JOINT-SELECT-A ---
+net axis-select-x     <=  [HMOT](CARD0).7i76.0.0.input-20
 # --- JOINT-SELECT-B ---
 net axis-select-y     <=  [HMOT](CARD0).7i76.0.0.input-21
 # --- JOINT-SELECT-C ---
