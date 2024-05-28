@@ -1,0 +1,19 @@
+G20 #1000=5
+
+o100 while [#1000]
+    G0 Y1.000
+    G4 P0.250
+    G0 Y0.500
+    G4 P0.250
+    #1000 = [#1000 - 1]
+o100 endwhile
+( msg, test 2 S to continue)
+M1
+#1000=100
+o101 while [#1000]
+    G0 Y1.000
+    G0 Y0.500
+    #1000 = [#1000 - 1]
+o101 endwhile
+M2
+( msg, Done)

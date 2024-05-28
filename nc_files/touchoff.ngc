@@ -1,0 +1,18 @@
+o<touchoff> sub
+; This is the touchoff subroutine for my Z on the PM30
+
+F20
+( move to a 'safe' zpos )
+G00 Z-0.25
+( move to our fixed pos )
+G1 X0.1 Y0.1
+
+( bring z down to touch )
+G38.2 Z-11 F6
+( set coordinate of P1 )
+G10 L20 P1 Z2.63
+G1 Z-1
+G92 Z0
+
+o<touchoff> endsub
+M2
