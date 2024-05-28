@@ -8,7 +8,7 @@ loadrt hm2_eth board_ip="10.10.10.10" config="num_encoders=1 num_pwmgens=0 num_s
 setp    [HMOT](CARD0).watchdog.timeout_ns 5000000
 loadrt pid names=pid.x,pid.y,pid.z,pid.s
 loadrt mux16 names=jogincr
-loadrt or2
+loadrt or2 count=2
 
 addf [HMOT](CARD0).read       servo-thread
 addf motion-command-handler   servo-thread
@@ -19,6 +19,7 @@ addf pid.z.do-pid-calcs       servo-thread
 addf pid.s.do-pid-calcs       servo-thread
 addf jogincr                  servo-thread
 addf or2.0                    servo-thread
+addf or2.1                    servo-thread
 addf [HMOT](CARD0).write         servo-thread
 setp [HMOT](CARD0).dpll.01.timer-us -50
 setp [HMOT](CARD0).stepgen.timer-number 1
@@ -42,7 +43,8 @@ net estop-out  =>     [HMOT](CARD0).7i76.0.0.output-14
 # Touch Probe
 net machine-is-enabled  =>     [HMOT](CARD0).7i76.0.0.output-03
 # Z Probe
-net machine-is-enabled  =>     [HMOT](CARD0).7i76.0.0.output-00
+#  this is on estop as overtravel on probe is a limit switch
+net estop-out  =>     [HMOT](CARD0).7i76.0.0.output-00
 net machine-is-enabled  =>     [HMOT](CARD0).7i76.0.0.output-01
 
 
@@ -112,20 +114,14 @@ net x-enable     => [HMOT](CARD0).stepgen.00.enable
 # I probably should re-wire so the order makes sense, but easier to do it in code
 net limit-x     <=  [HMOT](CARD0).7i76.0.0.input-04-not
 net limit-y     <=  [HMOT](CARD0).7i76.0.0.input-06-not
-#net limit-z or2.0.in0     <=  [HMOT](CARD0).7i76.0.0.input-05-not
-net limit-z     <=  [HMOT](CARD0).7i76.0.0.input-05-not
+net limit-z-sw <=  [HMOT](CARD0).7i76.0.0.input-05-not
+net limit-z-sw => or2.0.in0
 
 # home-sw-in driven TRUE when closed
 # my X limit is in the middle, so it triggers both ways
 net limit-x     =>  joint.0.home-sw-in joint.0.neg-lim-sw-in joint.0.pos-lim-sw-in 
 net limit-y     =>  joint.1.home-sw-in joint.1.neg-lim-sw-in
-net limit-z     =>  joint.2.home-sw-in joint.2.neg-lim-sw-in
-# trigger join2 limit if we have touch probe overtravel
-net joint2.neg-lim-sw-in <= or2.0.out #not sure this works...
-#net limit-XYZ   =>  joint.0.pos-lim-sw-in joint.1.pos.lim-sw-in joint.2.pos.lim-sw-in
-#net limit-x     =>  joint.0.home-sw-in joint.0.neg-lim-sw-in joint.0.pos-lim-sw-in 
-#net limit-y     =>  joint.1.home-sw-in joint.1.pos-lim-sw-in
-#net limit-z     =>  joint.2.home-sw-in joint.2.neg-lim-sw-in
+net or-limit-z or2.0.out  =>  joint.2.home-sw-in joint.2.neg-lim-sw-in
 
 #*******************
 #  AXIS Y JOINT 1
@@ -260,12 +256,19 @@ net coolant-mist      <=  iocontrol.0.coolant-mist
 net coolant-flood     <=  iocontrol.0.coolant-flood
 
 #  ---probe signal---
+#  Green = 13
+#  Red = 14
+#  Black = 15
+#  Yellow = 16
 net probe-in <= [HMOT](CARD0).7i76.0.0.input-13
-net touch-normal <= [HMOT](CARD0).7i76.0.0.input-14-not
-net touch-overtravel or2.0.in1 <= [HMOT](CARD0).7i76.0.0.input-15-not
+net probe-in => or2.1.in0
+net ztouch-normal <= [HMOT](CARD0).7i76.0.0.input-14-not
+net ztouch-normal => or2.1.in1
+net ztouch-overtravel <= [HMOT](CARD0).7i76.0.0.input-15-not
+net ztouch-overtravel => or2.0.in1
 
 
-net probe-in     =>  motion.probe-input
+net touchoff or2.1.out     =>  motion.probe-input
 
 # ---jogwheel signals to mesa encoder - shared MPG---
 
