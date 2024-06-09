@@ -1,0 +1,32 @@
+(info: face -- facing subrotine -- zero out at the top left of the piece )
+; probably G10 L20 P1 X0 Y0 Z0 first?
+o<face> sub
+  #<xrange>   = #1 (=4 X size) 
+  #<yrange>   = #2 (=2 Y size)   
+  #<zrange>   = #3 (=.2 Depth to remove)
+  #<zinc>     = #4 (=.1 Per Pass)
+  #<feedrate> = #5 (=8 IPM)
+  #<tooldia>  = #6 (=.25 diameter)
+  #<pass> = 0
+  #1000 = [[#<yrange> / #<tooldia>] / 2]
+
+  o100 while [#5422 GT -#<zrange>]
+    o101 while [#<pass> LT #1000]
+      G1 F#<feedrate> Y[0 - [#<tooldia>*#<pass>]]
+      G1 F#<feedrate> X[#<xrange>+#<tooldia>]
+      G1 F#<feedrate> Y[[-#<yrange>] + [#<tooldia>*#<pass>]]
+      G1 F#<feedrate> X0
+      #<pass> = [#<pass> + 1]
+    o101 endwhile
+    G1 F#<feedrate> Y0 X0 
+    #<pass> = 0
+    #<nextz> = [#5422 - #<zinc>]
+    o102 if [#<nextz> LT -#<zrange>]
+      #<nextz> = -#<zrange>
+    o102 endif
+    G1 F#<feedrate> Z#<nextz>
+  o100 endwhile
+
+  ; would i want to set Z=0 here?
+
+o<face> endsub

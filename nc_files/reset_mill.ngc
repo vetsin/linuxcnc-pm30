@@ -1,0 +1,9 @@
+%
+
+g17	; XY plane
+g20	; imperial, g21=metric
+g40	; disable cutter diameter compensation
+g49	; disable tool length compensaion
+g54	; set coordinate system 1
+g90     ; absolute mode, g91=relative
+g92.1   ; turn off g92 offsets
