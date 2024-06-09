@@ -11,6 +11,12 @@ o<face> sub
   #1000 = [[#<yrange> / #<tooldia>] / 2]
 
   o100 while [#5422 GT -#<zrange>]
+    #<nextz> = [#5422 - #<zinc>]
+    o102 if [#<nextz> LT -#<zrange>]
+      #<nextz> = -#<zrange>
+    o102 endif
+    G1 F#<feedrate> Z#<nextz>
+
     o101 while [#<pass> LT #1000]
       G1 F#<feedrate> Y[0 - [#<tooldia>*#<pass>]]
       G1 F#<feedrate> X[#<xrange>+#<tooldia>]
@@ -20,11 +26,8 @@ o<face> sub
     o101 endwhile
     G1 F#<feedrate> Y0 X0 
     #<pass> = 0
-    #<nextz> = [#5422 - #<zinc>]
-    o102 if [#<nextz> LT -#<zrange>]
-      #<nextz> = -#<zrange>
-    o102 endif
-    G1 F#<feedrate> Z#<nextz>
+
+
   o100 endwhile
 
   ; would i want to set Z=0 here?
